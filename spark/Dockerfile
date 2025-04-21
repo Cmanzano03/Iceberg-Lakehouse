@@ -1,7 +1,9 @@
+
+
 # ────────────────────────────────────────────────────────────────
 #  Spark + Iceberg (Bitnami) – GPG bypass
 # ────────────────────────────────────────────────────────────────
-FROM bitnami/spark:3.5.0       # usa Debian 12 pero lo “saltamos”
+FROM bitnami/spark:3.5.0
 
 # ─ Vars de versión
 ARG ICEBERG_VER=1.8.1
@@ -28,5 +30,6 @@ RUN mkdir -p /opt/bitnami/spark/jars \
       https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws-bundle/${ICEBERG_VER}/iceberg-aws-bundle-${ICEBERG_VER}.jar \
  && chown -R 1001:0 /opt/bitnami/spark/jars
 
-USER 1001   # vuelve al user no‑root de Bitnami
+ # vuelve al user no‑root de Bitnami
+USER 1001   
 
