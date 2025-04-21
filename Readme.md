@@ -25,7 +25,7 @@ A portable data lakehouse stack—Apache Iceberg + MinIO + Apache Spark (cluster
 
 ```bash
 # 1. Clone repository
-$ git clone https://github.com/<you>/moodle-lakehouse.git && cd moodle-lakehouse
+$ git clone https://github.com/<you>/Iceberg-lakehouse.git && cd Iceberg-lakehouse
 
 # 2. Build custom Spark + Iceberg image and start the stack
 $ docker-compose build
