@@ -9,8 +9,10 @@ USER root
 
 # --- Python dependencies & system utils ---
 COPY requirements.txt /tmp/requirements.txt
-RUN install_packages curl unzip python3-pip \
-    && pip install --no-cache -r /tmp/requirements.txt
+RUN apt-get update && apt-get install -y curl unzip python3-pip gnupg \
+    && pip install --no-cache -r /tmp/requirements.txt \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 # --- Iceberg runtime & AWS bundle ---
 RUN mkdir -p /opt/bitnami/spark/jars \
