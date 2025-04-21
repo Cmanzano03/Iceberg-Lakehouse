@@ -172,3 +172,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# MiniIO Data that is created when deploying the system
+# MinIO runtime data (should never be versioned)
+minio-data/
