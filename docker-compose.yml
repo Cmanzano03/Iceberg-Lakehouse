@@ -16,7 +16,6 @@ services:
       - iceberg_net
     volumes:
       - ./spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
-      - ./warehouse:/data/warehouse
       - ./spark-events:/home/iceberg/spark-events
 
   spark-worker-1:
