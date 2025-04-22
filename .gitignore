@@ -176,3 +176,8 @@ cython_debug/
 # MiniIO Data that is created when deploying the system
 # MinIO runtime data (should never be versioned)
 minio-data/
+
+#Volume mounted by docker-compose.yml
+warehouse/
+
+spark-events/
