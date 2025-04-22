@@ -6,6 +6,9 @@ services:
     container_name: spark-master
     environment:
       - SPARK_MODE=master
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
     ports:
       - "7077:7077"
       - "8080:8080"
@@ -15,13 +18,16 @@ services:
       - ./spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
       - ./warehouse:/data/warehouse
       - ./spark-events:/home/iceberg/spark-events
-      
+
   spark-worker-1:
     build: ./spark
     container_name: spark-worker-1
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
     depends_on:
       - spark-master
     networks:
@@ -33,6 +39,9 @@ services:
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
     depends_on:
       - spark-master
     networks:
@@ -52,21 +61,47 @@ services:
       - CATALOG_S3_ENDPOINT=http://minio:9000
     networks:
       - iceberg_net
-
   minio:
     image: minio/minio
     container_name: minio
-    command: server /data --console-address ":9001"
+    command: ["minio", "server", "/data", "--console-address", ":9001"]
     environment:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=password
+      - MINIO_DOMAIN=minio          # mantiene el alias S3 virtual-host, útil para Iceberg
+    networks:
+      iceberg_net:
+        aliases:
+          - warehouse.minio         # alias que el SDK de AWS resuelve
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
       - ./minio-data:/data
+
+
+  mc:
+    image: minio/mc:latest
+    container_name: mc
+    depends_on:
+      - minio            # espera a que MinIO arranque
+    environment:
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
     networks:
       - iceberg_net
+    entrypoint: >
+      /bin/sh -c "
+      # 1) Añade alias 'minio'
+      /usr/bin/mc config host add minio http://minio:9000 admin password --api S3v4;
+      # 2) Crea bucket warehouse si no existe (idempotente)
+      /usr/bin/mc ls minio/warehouse || /usr/bin/mc mb minio/warehouse;
+      # 3) (Opcional) Permite acceso anónimo de lectura
+      /usr/bin/mc anonymous set public minio/warehouse;
+      # 4) Mantén el contenedor vivo sin consumir CPU
+      tail -f /dev/null
+      "
 
 networks:
   iceberg_net:
