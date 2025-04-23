@@ -181,3 +181,5 @@ minio-data/
 warehouse/
 
 spark-events/
+
+catalog/
